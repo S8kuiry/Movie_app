@@ -1,98 +1,128 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, ActivityIndicator, FlatList } from "react-native";
+import React from "react";
+import { images } from "@/constants/images";
+import { icons } from "@/constants/icons";
+import SearchArea from "@/components/SearchArea";
+import { useRouter } from "expo-router";
+import useFetch from "@/services/useFetch";
+import { fetchMovies } from "@/services/api";
+import MovieCard from "@/components/MovieCard";
+import { getTrendingMovies } from "@/services/appwrite";
+import TrendingCard from "@/components/TrendingCard";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const Index = () => {
+  const router = useRouter();
 
-export default function HomeScreen() {
+  // Fetch trending movies
+  const {
+    data: trendingMovies,
+    loading: trendingLoading,
+    error: trendingError,
+  } = useFetch(getTrendingMovies);
+
+  // Fetch latest movies
+  const {
+    data: movies,
+    loading: moviesLoading,
+    error: moviesError,
+  } = useFetch(() => fetchMovies({ query: "" }));
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+    <View className="flex-1 bg-primary">
+      {/* Background */}
+      <Image
+        source={images.bg}
+        style={{ position: "absolute", width: "100%", height: "100%" }}
+      />
+
+      <ScrollView
+        className="flex-1 px-5"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          minHeight: "100%",
+          paddingBottom: 100,
+        }}
+      >
+        {/* Logo */}
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={icons.logo}
+          className="w-10 h-10 mt-20 mb-5 mx-auto"
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
+
+        {/* Search Area */}
+        <SearchArea
+          onPress={() => router.push("/search")}
+          placeholder={"Search through 300+ movies online"}
+        />
+
+        {/* Trending Movies Header */}
+        {trendingMovies && trendingMovies.length > 0 && (
+          <View className="mt-10">
+            <Text className="text-white font-bold text-lg">
+              Trending Movies
+            </Text>
+          </View>
+        )}
+
+        {/* Movies Section */}
+        {(moviesLoading || trendingLoading) ? (
+          <ActivityIndicator
+            size="large"
+            color="#ab8bff"
+            style={{ marginTop: 20, alignSelf: "center" }}
+          />
+        ) : (moviesError || trendingError) ? (
+          <Text className="text-red-500 text-center mt-5">
+            Error: {String(moviesError || trendingError)}
+          </Text>
+        ) : (
+          <View className="flex-1 mt-5">
+            {/* Trending Movies List */}
+            <FlatList
+              data={Array.isArray(trendingMovies) ? trendingMovies : []}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              ItemSeparatorComponent={() => <View className="w-4" />}
+              keyExtractor={(item, index) =>
+                `trending-${item.movie_id}-${index}`
+              }
+              renderItem={({ item, index }) =>
+                item ? (
+                  <TrendingCard
+                    movie_id={item.movie_id}
+                    title={item.title || ""}
+                    poster_url={item.poster_url || ""}
+                    index={index} // ✅ properly passed index
+                  />
+                ) : null
+              }
             />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+            {/* Latest Movies Section */}
+            <Text className="text-lg text-white font-bold mt-5 mb-3">
+              Latest Movies
+            </Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+            <FlatList
+              data={Array.isArray(movies) ? movies : []}
+              renderItem={({ item }) => <MovieCard {...item} />}
+              keyExtractor={(item, index) =>
+                item?.id ? item.id.toString() : index.toString()
+              }
+              numColumns={3}
+              columnWrapperStyle={{
+                justifyContent: "flex-start",
+                gap: 20,
+                paddingRight: 5,
+                marginBottom: 10,
+              }}
+              className="mt-2 pb-32"
+              scrollEnabled={false}
+            />
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default Index;
