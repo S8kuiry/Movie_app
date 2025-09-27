@@ -1,4 +1,14 @@
 # Welcome to your Expo app 👋
+# 🎬 Movie Viewer App
+
+👉 [Download APK](https://expo.dev/accounts/subhkuiry/projects/movie_app/builds/beb1f382-d6e3-45e7-9770-2a3ad7bfa6ef)
+
+---
+
+# Welcome to your Expo app 👋
+
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
