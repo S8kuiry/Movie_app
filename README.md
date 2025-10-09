@@ -1,7 +1,7 @@
 # Welcome to your Expo app 👋
 # 🎬 Movie Viewer App
 
-👉 [Download APK](https://expo.dev/accounts/subhkuiry/projects/movie_app/builds/beb1f382-d6e3-45e7-9770-2a3ad7bfa6ef)
+👉 [View Live App on Expo](https://expo.dev/preview/update?message=Initial+live+release&updateRuntimeVersion=1.0.0&createdAt=2025-10-09T17%3A34%3A25.778Z&slug=exp&projectId=9733daed-c4bb-49e3-9c58-464293299930&group=c2c6dd6d-8ebd-46df-bdae-f9bf3966b6d9)
 
 ---
 
